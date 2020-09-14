@@ -18,62 +18,62 @@ public class HTMLStrings {
      * @return //
      */
     public static String copy(String input) {
-        String message = "";
-        String[] arr = input.split(",");
-        int begin = Integer.parseInt(arr[0]);
-        int end = Integer.parseInt(arr[1]);
+        String copy = "";
+        String[] stringToArr = input.split(",");
+        int begin = Integer.parseInt(stringToArr[0]);
+        int end = Integer.parseInt(stringToArr[1]);
 
         // if input is null
         if (begin == 0 && end == 0) {
             return "";
         }
 
-        String[] strings = arr[2].split("");
-        ArrayList<String> arrList = new ArrayList<String>();
-        ArrayList<String> tagList = new ArrayList<String>();
+        String[] stringArr = stringToArr[2].split("");
+        ArrayList<String> messageArr = new ArrayList<String>();
+        ArrayList<String> tagArr = new ArrayList<String>();
 
-        // Finds message between indexes
+        // Finds start tags
         for (int i = 0; i < begin; i++) {
-            if (strings[i].equals("<")) {
-                if (strings[i + 1].equals("/")) {
+            if (stringArr[i].equals("<")) {
+                if (stringArr[i + 1].equals("/")) {
                     continue;
                 }
-                while (!strings[i].equals(">")) {
-                    message += strings[i];
+                while (!stringArr[i].equals(">")) {
+                    copy += stringArr[i];
                     i++;
                 }
-                message += ">";
-                if (arrList.contains(message)) {
+                copy += ">";
+                if (messageArr.contains(copy)) {
                     continue;
                 }
-                arrList.add(message);
-                message = "";
+                messageArr.add(copy);
+                copy = "";
 
             }
 
         }
 
-        // Finds start tags
+        // Finds message, including tags if it's in the message
         for (int i = begin; i < end; i++) {
 
             // finds tags
-            if (strings[i].equals("<")) {
+            if (stringArr[i].equals("<")) {
                 // Loop to find end of tag
-                while (!strings[i].equals(">")) {
-                    message += strings[i];
+                while (!stringArr[i].equals(">")) {
+                    copy += stringArr[i];
                     i++;
                 }
-                message += ">";
-                arrList.add(message);
-                message = "";
+                copy += ">";
+                messageArr.add(copy);
+                copy = "";
             }
             else {
-                arrList.add(strings[i]);
+                messageArr.add(stringArr[i]);
 
             }
         }
 
-        message = "";
+        copy = "";
 
         // Finds end tags
 
@@ -84,26 +84,29 @@ public class HTMLStrings {
 
         for (int i = 1; i < end; i++) {
 
-            if (strings[i - 1].equals("<")) {
-                if (strings[i].equals("/")) {
-
+            // Determines if there is a tag
+            if (stringArr[i - 1].equals("<")) {
+                if (stringArr[i].equals("/")) {
                     continue;
                 }
-                while (!strings[i].equals(">")) {
-                    message += strings[i];
+                while (!stringArr[i].equals(">")) {
+                    copy += stringArr[i];
                     i++;
                 }
-                message += ">";
-                if (!arrList.contains("</" + message)) {
-                    tagList.add("</" + message);
-                    message = "";
+                copy += ">";
+
+                // If the arrayList does not contain the end tag, this will add
+                // it to the list of tags.
+                if (!messageArr.contains("</" + copy)) {
+                    tagArr.add("</" + copy);
+                    copy = "";
                     continue;
                 }
                 if (i == end - 1) {
                     break;
                 }
 
-                message = "";
+                copy = "";
 
             }
 
@@ -111,40 +114,54 @@ public class HTMLStrings {
         String temp = "<";
 
         // Guard for if indexes are whole string length
-        if (begin == end && end == strings.length) {
+        if (begin == end && end == stringArr.length) {
             begin = 0;
         }
         // Finds if tags are closed before start of index
         for (int i = 0; i < begin; i++) {
 
-            if (strings[i].equals("/")) {
-                while (!strings[i + 1].equals(">")) {
-                    temp += strings[i + 1];
+            if (stringArr[i].equals("/")) {
+                while (!stringArr[i + 1].equals(">")) {
+                    temp += stringArr[i + 1];
                     i++;
 
                 }
                 temp += ">";
-                if (arrList.contains(temp)) {
-                    arrList.remove(temp);
+                // Removes element from arrayList if it's already in there
+                if (messageArr.contains(temp)) {
+                    messageArr.remove(temp);
                     temp = "<";
                 }
             }
         }
 
-        for (String s : arrList) {
-            message += s;
+        // Iterates through the arrayList to make it one string which can be
+        // returned.
+        for (String s : messageArr) {
+            copy += s;
         }
 
-        for (int i = tagList.size() - 1; i >= 0; i--) {
-            if (end == strings.length) {
+        // This loop reverses the order of the tags in the final message so the
+        // tags are in the correct format.
+        for (int i = tagArr.size() - 1; i >= 0; i--) {
+
+            // Does not add the tags at the end if already contained in the
+            // message.
+            if (end == stringArr.length) {
                 break;
             }
-            message += tagList.get(i);
+            copy += tagArr.get(i);
         }
-        return message;
+        return copy;
     }
 
 
+    /**
+     * Main method
+     * 
+     * @param args
+     *            arguments
+     */
     public static void main(String[] args) {
         System.out.println(copy("0,15,Testing<b>!</b>"));
     }
